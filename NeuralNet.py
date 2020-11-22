@@ -61,27 +61,27 @@ model.compile(optimizer='adam',
 
 # model.fit(train_dataset)
 results = []
-for epochs in range(0, 100, 5):
+for epochs in range(0, 50, 5):
     max_accuracy = 0
     model = keras.Sequential([
         keras.layers.Dense(units=256, input_dim=256, activation='relu'),
         keras.layers.Dense(units=192, activation='relu'),
         keras.layers.Dense(units=144, activation='relu'),
         keras.layers.Dense(units=108, activation='relu'),
-        # keras.layers.Dense(units=81, activation='relu'),
-        # keras.layers.Dense(units=60, activation='relu'),
-        # keras.layers.Dense(units=45, activation='relu'),
-        # keras.layers.Dense(units=34, activation='relu'),
-        # keras.layers.Dense(units=25, activation='relu'),
+        keras.layers.Dense(units=81, activation='relu'),
+        keras.layers.Dense(units=60, activation='relu'),
+        keras.layers.Dense(units=45, activation='relu'),
+        keras.layers.Dense(units=34, activation='relu'),
+        keras.layers.Dense(units=25, activation='relu'),
         keras.layers.Dense(units=25, activation='relu'),
         keras.layers.Dense(units=19, activation='relu'),
         keras.layers.Dense(units=12, activation='relu'),
         keras.layers.Dense(units=4, activation='softmax')
     ])
     # opt = keras.optimizers.Adam(learning_rate=0.01)
-    model.compile(optimizer='adam',
-              loss='categorical_crossentropy',
-              metrics=['accuracy'])
+    model.compile(
+        loss='categorical_crossentropy',
+        metrics=['accuracy'])
     for i in range(0, 50):
         model.fit(train_input, train_output,epochs=epochs, verbose=0)
 

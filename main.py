@@ -47,7 +47,7 @@ raw_data = deque(maxlen=int(reads_per_data * 1)) #192
 counter = 0
 lastdata = 0
 
-data_size = 240
+data_size = 630
 time_per_data = 1
 
 training_data_input = np.zeros((data_size, reads_per_data))
@@ -76,10 +76,18 @@ for sample in range(data_size):
     # print(list(raw_data))
     training_data_input[sample] = list(raw_data)
     training_data_output[sample][dir] = 1
-    print(time.time() - time_save)
+    # print(time.time() - time_save)
 
-print(training_data_input, training_data_input.shape)
-# np.save("trainingdata/input.npy", training_data_input)
-# np.save("trainingdata/output.npy", training_data_output)
+# print(training_data_input, training_data_input.shape)
+try:
+    old_training_input = np.load("trainingdata/input.npy")
+    old_training_output = np.load("trainingdata/output.npy")
+
+    training_data_input = np.concatenate((training_data_input, old_training_input))
+    training_data_output = np.concatenate((training_data_output, old_training_output))
+except:
+    print("Old Data Not Found, Overriding")
+np.save("trainingdata/input.npy", training_data_input)
+np.save("trainingdata/output.npy", training_data_output)
 pygame.quit()
 quit()
