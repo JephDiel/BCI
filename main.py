@@ -47,12 +47,23 @@ raw_data = deque(maxlen=int(reads_per_data * 1)) #192
 counter = 0
 lastdata = 0
 
-data_size = 630
+data_size = 60
 time_per_data = 1
 
-training_data_input = np.zeros((data_size, reads_per_data))
-training_data_output = np.zeros((data_size, 4))
+training_data_input = np.zeros((data_size * reads_per_data, reads_per_data))
+training_data_output = np.zeros((data_size * reads_per_data, 4))
 
+data_index = 0
+
+for reads in range(reads_per_data):
+        delay = time.time()
+        my_device.fetch_data()
+        data = my_device.data
+        if 'eeg_raw' in data:
+            raw_data.append(data['eeg_raw'])
+            lastdata = data['eeg_raw']
+        else:
+            raw_data.append(lastdata)
 
 for sample in range(data_size):
     dir = random.randrange(4)
@@ -69,25 +80,29 @@ for sample in range(data_size):
         else:
             raw_data.append(lastdata)
         
-
+        training_data_input[data_index] = list(raw_data)
+        training_data_output[data_index][dir] = 1
+        data_index += 1
         time.sleep(time_per_data/reads_per_data - (time.time() - delay))
         delay = time.time()
 
+
     # print(list(raw_data))
-    training_data_input[sample] = list(raw_data)
-    training_data_output[sample][dir] = 1
+    
     # print(time.time() - time_save)
 
 # print(training_data_input, training_data_input.shape)
 try:
-    old_training_input = np.load("trainingdata/input.npy")
-    old_training_output = np.load("trainingdata/output.npy")
+    old_training_input = np.load("trainingdata/input2.npy")
+    old_training_output = np.load("trainingdata/output2.npy")
 
     training_data_input = np.concatenate((training_data_input, old_training_input))
     training_data_output = np.concatenate((training_data_output, old_training_output))
 except:
     print("Old Data Not Found, Overriding")
-np.save("trainingdata/input.npy", training_data_input)
-np.save("trainingdata/output.npy", training_data_output)
+np.save("trainingdata/input2.npy", training_data_input)
+np.save("trainingdata/output2.npy", training_data_output)
+
+print("Added " + str(training_data_input.shape[0]) + " Items with " + str(training_data_input.shape[1]) + " elements each")
 pygame.quit()
 quit()

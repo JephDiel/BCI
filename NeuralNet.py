@@ -3,6 +3,7 @@ from random import shuffle
 from re import VERBOSE
 import re
 import numpy as np
+import numpy
 from numpy.core.defchararray import mod
 from numpy.core.fromnumeric import amax, size
 import tensorflow as tf
@@ -12,11 +13,12 @@ from tensorflow.python.module.module import valid_identifier
 # from tensorflow.keras import layers
 # from tensorflow.python.keras import activations
 
-input = np.load("trainingdata/input.npy")
+input = np.load("trainingdata/input2.npy")
+print("Learning with:", input.shape[0], "Data Points")
 
-output = np.load("trainingdata/output.npy")
+output = np.load("trainingdata/output2.npy")
 
-split_mark = int(len(input) * 0.8)
+split_mark = int((len(input) // 256) * 0.7) * 256
 
 train_input = input[:split_mark]
 train_output = output[:split_mark]
@@ -61,9 +63,11 @@ model.compile(optimizer='adam',
 
 # model.fit(train_dataset)
 results = []
-for epochs in range(0, 50, 5):
+for epochs in range(0, 100, 1):
     max_accuracy = 0
-    model = keras.Sequential([
+    
+    for i in range(0, 100):
+        model = keras.Sequential([
         keras.layers.Dense(units=256, input_dim=256, activation='relu'),
         keras.layers.Dense(units=192, activation='relu'),
         keras.layers.Dense(units=144, activation='relu'),
@@ -77,13 +81,14 @@ for epochs in range(0, 50, 5):
         keras.layers.Dense(units=19, activation='relu'),
         keras.layers.Dense(units=12, activation='relu'),
         keras.layers.Dense(units=4, activation='softmax')
-    ])
-    # opt = keras.optimizers.Adam(learning_rate=0.01)
-    model.compile(
-        loss='categorical_crossentropy',
-        metrics=['accuracy'])
-    for i in range(0, 50):
-        model.fit(train_input, train_output,epochs=epochs, verbose=0)
+        ])
+        # opt = keras.optimizers.Adam(learning_rate=0.01)
+        model.compile(
+            optimizer='adam',
+            loss='categorical_crossentropy',
+            metrics=['accuracy'])
+            
+        model.fit(train_input, train_output, epochs=epochs, verbose=0)
 
         # predictions = model.evaluate(test_dataset)
         predictions = model.predict(test_input)
@@ -95,25 +100,49 @@ for epochs in range(0, 50, 5):
 
         correct = 0
         incorrect = 0
-        amount = len(predictions)
+        amount = len(predictions) // 256
 
         for i in range(amount):
-            max_prediction = max(list(range(4)), key = lambda j: predictions[i][j])
-            confidence = max(predictions[i])
-            max_test = max(list(range(4)), key = lambda j: test_output[i][j])
-            # print("Predicted:", max_prediction)
-            # print("Actual: ", max_test)
-            # print("Confidence:", confidence)
+
+            prediction = [0,0,0,0]
+
+            truth = max_test = max(list(range(4)), key = lambda j: test_output[i * 256][j])
+
+            for window in range(256):
+                max_prediction = max(list(range(4)), key = lambda j: predictions[(i * 256) + window][j])
+                confidence = max(predictions[(i * 256) + window])
+                max_test = max(list(range(4)), key = lambda j: test_output[(i * 256) + window][j])
+                if (max_test != truth):
+                    print("Error Parsing Window, inconsistent truth")
+                    exit()
+                for k in range(4):
+                    prediction[k] += predictions[(i * 256) + window][k]
+                # print("Predicted:", max_prediction)
+                # print("Actual: ", max_test)
+                # print("Confidence:", confidence)
+            
+            normalizing_factor = sum(prediction)
+            for k in range(4):
+                prediction[k] /= normalizing_factor
+            
+            max_prediction = max(list(range(4)), key = lambda j: prediction[j])
             if max_prediction == max_test:
                 correct += 1
             else:
                 incorrect += 1
-
+            # print("Truth", truth)
+            # print("Prediction:", max_prediction)
+            # print("Confidence:", prediction[max_prediction])
+            # print("Distribution:", prediction)
+            # print("--------------------------")
         accuracy = correct / amount
-        print("Accuracy:", accuracy)
-        print("Epochs:", epochs)
-        print("---------------------")
+        # print("Accuracy:", accuracy)
+        # print("Epochs:", epochs)
+        # print("---------------------")
         max_accuracy = max(max_accuracy, accuracy)
+    print("Accuracy:", max_accuracy)
+    print("Epochs:", epochs)
+    print("---------------------")
     results.append((max_accuracy, epochs))
 
 for result in results:
