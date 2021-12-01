@@ -118,6 +118,9 @@ my_device.close()
 training_data_input = np.array(training_data_input)
 training_data_output = np.array(training_data_output)
 
+print("Adding " + str(training_data_input.shape[0]) + " Items with " + str(training_data_input.shape[1]) + " elements each")
+
+
 try:
     old_training_input = np.load("trainingdata/input3.npy")
     old_training_output = np.load("trainingdata/output3.npy")
@@ -128,4 +131,4 @@ except:
     print("Old Data Not Found, Overriding")
 np.save("trainingdata/input3.npy", training_data_input)
 np.save("trainingdata/output3.npy", training_data_output)
-print("Added " + str(training_data_input.shape[0]) + " Items with " + str(training_data_input.shape[1]) + " elements each")
+print("Total " + str(training_data_input.shape[0]) + " Items with " + str(training_data_input.shape[1]) + " elements each")

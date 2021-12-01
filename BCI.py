@@ -13,7 +13,7 @@ import numpy as np
 my_device = ThinkGear("COM5")
 
 # Recreate the exact same model, including its weights and the optimizer
-model = tf.keras.models.load_model('saved_models/bestModelconvolved')
+model = tf.keras.models.load_model('saved_models/boosting/cnn40')
 
 # Show the model architecture
 model.summary()
@@ -56,7 +56,7 @@ running = True
 pos = (250,250)
 dir = (0,0)
 clock = Clock()
-speed = 10
+speed = 20
 
 score = 0
 foodpos = (250, 100)
@@ -75,12 +75,16 @@ for reads in range(reads_per_data):
 
 running = True
 evaluation = [0,0,0,0]
+input = np.array(256)
 
 while running:
-    evaluation = model.predict(np.array([list(raw_data)])[..., np.newaxis])[0]
+    input = np.array([list(raw_data)])
+    input = input - np.apply_along_axis(lambda a: np.convolve(a, np.ones(11)/11, 'same'), axis=1, arr=input) + 60
+    input = input[..., np.newaxis]
+    new_evaluation = model.predict(input)[0]
     # print(new_evaluation)
-    # for i in range(4):
-    #     evaluation[i] = (0.99 * evaluation[i]) + (0.01 * new_evaluation[i])
+    for i in range(4):
+        evaluation[i] = (0.99 * evaluation[i]) + (0.01 * new_evaluation[i])
     direction = max(list(range(4)), key = lambda j: evaluation[j])
     delta  = 1 / float(clock.tick(reads_per_data))
     # Did the user click the window close button?

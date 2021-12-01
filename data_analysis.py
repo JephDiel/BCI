@@ -12,9 +12,9 @@ print(len(input[0]), len(input_smoothed[0]))
 
 print(np.sum(output, axis=0) / np.sum(output))
 
-print(input)
-print("----------------")
-print(input[..., np.newaxis])
+# print(input)
+# print("----------------")
+# print(input[..., np.newaxis])
 
 
 output = np.load("trainingdata/output3.npy")
