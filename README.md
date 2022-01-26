@@ -8,3 +8,8 @@ Initial plans are to atttempt to detect the thought patterns of the 4 primary di
 
 Current Best: CNN with ~30% accuracy.
     saved_models/bestModelConvolved
+
+
+
+# Update:
+This project was moved to a Google Colab notebook, please [visit here](https://colab.research.google.com/drive/1xEcQu58leojH4AFMdBaRDkihvwdEmdDB?usp=sharing) for the latest progress
